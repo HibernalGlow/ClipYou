@@ -36,7 +36,8 @@ enum class SyncState {
 
 enum class ConnectionMode {
     Wifi,
-    Usb
+    Usb,
+    Bluetooth
 }
 
 data class SyncConfig(

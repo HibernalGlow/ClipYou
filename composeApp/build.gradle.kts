@@ -104,9 +104,9 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Rpm)
-            packageName = "Clipypse"
+            packageName = "ClipYou"
             packageVersion = "1.0.0"
-            description = "Clipypse - Cross-platform Clipboard Sync"
+            description = "ClipYou - Cross-platform Clipboard Sync"
             vendor = "LanRhyme"
             copyright = "Copyright (c) 2026 LanRhyme"
             modules("java.net.http", "jdk.accessibility", "jdk.unsupported.desktop")
@@ -114,7 +114,7 @@ compose.desktop {
             windows {
                 perUserInstall = true
                 menu = true
-                menuGroup = "Clipypse"
+                menuGroup = "ClipYou"
                 shortcut = true
                 console = false
             }

@@ -25,7 +25,7 @@ fun App() {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Clipypse") },
+                    title = { Text("ClipYou") },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -136,6 +136,11 @@ fun ConnectionCard(
                     selected = uiState.mode == ConnectionMode.Usb,
                     onClick = { onModeChange(ConnectionMode.Usb) },
                     label = { Text("USB") }
+                )
+                FilterChip(
+                    selected = uiState.mode == ConnectionMode.Bluetooth,
+                    onClick = { onModeChange(ConnectionMode.Bluetooth) },
+                    label = { Text("Bluetooth") }
                 )
             }
 
