@@ -8,6 +8,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class BluetoothDeviceInfo(
+    val name: String,
+    val address: String,
+    val bonded: Boolean = false
+)
+
 data class AppUiState(
     val syncState: SyncState = SyncState.Idle,
     val mode: ConnectionMode = ConnectionMode.Wifi,
@@ -20,7 +26,9 @@ data class AppUiState(
     val autoSync: Boolean = true,
     val maxHistorySize: Int = Constants.MAX_HISTORY_SIZE,
     val errorMessage: String? = null,
-    val lastSyncTime: Long = 0
+    val lastSyncTime: Long = 0,
+    val bluetoothDevices: List<BluetoothDeviceInfo> = emptyList(),
+    val isBluetoothDiscovering: Boolean = false
 )
 
 class MainViewModel : ViewModel() {
@@ -125,8 +133,52 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(errorMessage = null) }
     }
 
+    fun startBluetoothDiscovery() {
+        startBluetoothDiscoveryPlatform()
+    }
+
+    fun stopBluetoothDiscovery() {
+        stopBluetoothDiscoveryPlatform()
+    }
+
+    fun selectBluetoothDevice(device: BluetoothDeviceInfo) {
+        _uiState.update { it.copy(ipAddress = device.address) }
+    }
+
+    fun updateBluetoothDevices(devices: List<BluetoothDeviceInfo>) {
+        _uiState.update { it.copy(bluetoothDevices = devices) }
+    }
+
+    fun updateBluetoothDiscovering(isDiscovering: Boolean) {
+        _uiState.update { it.copy(isBluetoothDiscovering = isDiscovering) }
+    }
+
+    fun attachBluetoothManager(manager: Any) {
+        attachBluetoothManagerPlatform(manager)
+    }
+
+    private fun startBluetoothDiscoveryPlatform() {
+        startBluetoothDiscoveryImpl()
+    }
+
+    private fun stopBluetoothDiscoveryPlatform() {
+        stopBluetoothDiscoveryImpl()
+    }
+
+    private fun attachBluetoothManagerPlatform(manager: Any) {
+        attachBluetoothManagerImpl(manager)
+    }
+
+    fun attachBluetoothManagerInternal(manager: Any) {
+        attachBluetoothManagerPlatform(manager)
+    }
+
     override fun onCleared() {
         super.onCleared()
         clipboardEngine.stop()
     }
 }
+
+internal expect fun MainViewModel.startBluetoothDiscoveryImpl()
+internal expect fun MainViewModel.stopBluetoothDiscoveryImpl()
+internal expect fun MainViewModel.attachBluetoothManagerImpl(manager: Any)

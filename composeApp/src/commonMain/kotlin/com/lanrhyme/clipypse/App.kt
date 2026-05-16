@@ -1,5 +1,6 @@
 package com.lanrhyme.clipypse
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,10 @@ import java.util.*
 fun App() {
     val viewModel = remember { MainViewModel() }
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        initBluetoothManager(viewModel)
+    }
 
     MaterialTheme {
         Scaffold(
@@ -47,7 +52,10 @@ fun App() {
                     onIpChange = viewModel::setIpAddress,
                     onPortChange = viewModel::setPort,
                     onStart = viewModel::startSync,
-                    onStop = viewModel::stopSync
+                    onStop = viewModel::stopSync,
+                    onBluetoothDiscoveryStart = viewModel::startBluetoothDiscovery,
+                    onBluetoothDiscoveryStop = viewModel::stopBluetoothDiscovery,
+                    onBluetoothDeviceSelect = viewModel::selectBluetoothDevice
                 )
 
                 StatusCard(
@@ -87,7 +95,10 @@ fun ConnectionCard(
     onIpChange: (String) -> Unit,
     onPortChange: (String) -> Unit,
     onStart: () -> Unit,
-    onStop: () -> Unit
+    onStop: () -> Unit,
+    onBluetoothDiscoveryStart: () -> Unit,
+    onBluetoothDiscoveryStop: () -> Unit,
+    onBluetoothDeviceSelect: (BluetoothDeviceInfo) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -145,19 +156,117 @@ fun ConnectionCard(
             }
 
             if (!uiState.isServer) {
-                OutlinedTextField(
-                    value = uiState.ipAddress,
-                    onValueChange = onIpChange,
-                    label = { 
-                        Text(if (uiState.mode == ConnectionMode.Bluetooth) "Bluetooth Device Address" else "IP Address") 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = uiState.syncState == SyncState.Idle,
-                    placeholder = { 
-                        Text(if (uiState.mode == ConnectionMode.Bluetooth) "XX:XX:XX:XX:XX:XX" else "192.168.1.1") 
+                if (uiState.mode == ConnectionMode.Bluetooth) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = if (uiState.isBluetoothDiscovering) onBluetoothDiscoveryStop else onBluetoothDiscoveryStart,
+                            modifier = Modifier.weight(1f),
+                            enabled = uiState.syncState == SyncState.Idle
+                        ) {
+                            if (uiState.isBluetoothDiscovering) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Stop")
+                                }
+                            } else {
+                                Text("Scan Devices")
+                            }
+                        }
                     }
-                )
+
+                    if (uiState.bluetoothDevices.isNotEmpty()) {
+                        Text(
+                            text = "Available Devices",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(uiState.bluetoothDevices) { device ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { 
+                                            onBluetoothDeviceSelect(device)
+                                            onBluetoothDiscoveryStop()
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (device.address == uiState.ipAddress) 
+                                            MaterialTheme.colorScheme.primaryContainer 
+                                        else 
+                                            MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Bluetooth,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = device.name,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                            Text(
+                                                text = device.address,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.outline
+                                            )
+                                        }
+                                        if (device.bonded) {
+                                            Text(
+                                                text = "Paired",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = uiState.ipAddress,
+                        onValueChange = onIpChange,
+                        label = { Text("Or enter address manually") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        singleLine = true,
+                        enabled = uiState.syncState == SyncState.Idle,
+                        placeholder = { Text("XX:XX:XX:XX:XX:XX") }
+                    )
+                } else {
+                    OutlinedTextField(
+                        value = uiState.ipAddress,
+                        onValueChange = onIpChange,
+                        label = { Text("IP Address") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = uiState.syncState == SyncState.Idle,
+                        placeholder = { Text("192.168.1.1") }
+                    )
+                }
             }
 
             if (uiState.mode != ConnectionMode.Bluetooth) {
@@ -387,3 +496,5 @@ fun HistoryItem(
         }
     )
 }
+
+internal expect fun initBluetoothManager(viewModel: MainViewModel)
