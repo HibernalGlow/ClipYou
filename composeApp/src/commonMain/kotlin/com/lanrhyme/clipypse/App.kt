@@ -11,14 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.remember
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
-    val viewModel: MainViewModel = viewModel()
+    val viewModel = remember { MainViewModel() }
     val uiState by viewModel.uiState.collectAsState()
 
     MaterialTheme {
@@ -58,7 +58,8 @@ fun App() {
                 HistoryCard(
                     history = uiState.clipboardHistory,
                     onClear = viewModel::clearHistory,
-                    onResend = viewModel::sendClipboardItem
+                    onResend = viewModel::sendClipboardItem,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -273,12 +274,11 @@ fun StatusCard(
 fun HistoryCard(
     history: List<ClipboardItem>,
     onClear: () -> Unit,
-    onResend: (ClipboardItem) -> Unit
+    onResend: (ClipboardItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier

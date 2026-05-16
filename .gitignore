@@ -11,6 +11,9 @@ local.properties
 captures
 .externalNativeBuild
 .cxx
+gradle-9.5/
+jdk17/
+jdk/
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
