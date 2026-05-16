@@ -148,21 +148,28 @@ fun ConnectionCard(
                 OutlinedTextField(
                     value = uiState.ipAddress,
                     onValueChange = onIpChange,
-                    label = { Text("IP Address") },
+                    label = { 
+                        Text(if (uiState.mode == ConnectionMode.Bluetooth) "Bluetooth Device Address" else "IP Address") 
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    enabled = uiState.syncState == SyncState.Idle
+                    enabled = uiState.syncState == SyncState.Idle,
+                    placeholder = { 
+                        Text(if (uiState.mode == ConnectionMode.Bluetooth) "XX:XX:XX:XX:XX:XX" else "192.168.1.1") 
+                    }
                 )
             }
 
-            OutlinedTextField(
-                value = uiState.port,
+            if (uiState.mode != ConnectionMode.Bluetooth) {
+                OutlinedTextField(
+                    value = uiState.port,
                 onValueChange = onPortChange,
                 label = { Text("Port") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 enabled = uiState.syncState == SyncState.Idle
             )
+            }
 
             Button(
                 onClick = if (uiState.syncState == SyncState.Idle) onStart else onStop,

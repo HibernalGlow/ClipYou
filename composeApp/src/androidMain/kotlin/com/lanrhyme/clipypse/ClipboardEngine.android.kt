@@ -8,6 +8,8 @@ import android.net.Uri
 import android.os.Build
 import com.lanrhyme.clipypse.network.ClipboardClient
 import com.lanrhyme.clipypse.network.ClipboardServer
+import com.lanrhyme.clipypse.network.BluetoothClient
+import com.lanrhyme.clipypse.network.BluetoothServer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.ByteArrayOutputStream
@@ -30,6 +32,8 @@ actual class ClipboardEngine actual constructor() {
 
     private var server: ClipboardServer? = null
     private var client: ClipboardClient? = null
+    private var bluetoothServer: BluetoothServer? = null
+    private var bluetoothClient: BluetoothClient? = null
     private var monitorJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -68,10 +72,18 @@ actual class ClipboardEngine actual constructor() {
         _lastError.value = null
 
         try {
-            if (isServer) {
-                startServer(port)
+            if (mode == ConnectionMode.Bluetooth) {
+                if (isServer) {
+                    startBluetoothServer()
+                } else {
+                    startBluetoothClient(ip)
+                }
             } else {
-                startClient(ip, port, mode)
+                if (isServer) {
+                    startServer(port)
+                } else {
+                    startClient(ip, port, mode)
+                }
             }
 
             startClipboardMonitor()
@@ -127,6 +139,51 @@ actual class ClipboardEngine actual constructor() {
         )
         client?.connect()
         Logger.i("ClipboardEngine", "Client connected to $targetIp:$port")
+    }
+
+    private suspend fun startBluetoothServer() {
+        val context = AndroidContext.context ?: throw IllegalStateException("Context not initialized")
+        bluetoothServer = BluetoothServer(
+            context = context,
+            onClipboardReceived = { packet ->
+                handleReceivedClipboard(packet)
+            },
+            onDeviceConnected = { deviceInfo ->
+                _remoteDevice.value = deviceInfo
+            },
+            onDeviceDisconnected = {
+                _remoteDevice.value = null
+                _isConnected.value = false
+            },
+            onError = { error ->
+                _lastError.value = error
+            }
+        )
+        bluetoothServer?.start()
+        Logger.i("ClipboardEngine", "Bluetooth server started")
+    }
+
+    private suspend fun startBluetoothClient(deviceAddress: String) {
+        val context = AndroidContext.context ?: throw IllegalStateException("Context not initialized")
+        bluetoothClient = BluetoothClient(
+            context = context,
+            deviceAddress = deviceAddress,
+            onClipboardReceived = { packet ->
+                handleReceivedClipboard(packet)
+            },
+            onConnected = {
+                _isConnected.value = true
+            },
+            onDisconnected = {
+                _isConnected.value = false
+                _remoteDevice.value = null
+            },
+            onError = { error ->
+                _lastError.value = error
+            }
+        )
+        bluetoothClient?.connect()
+        Logger.i("ClipboardEngine", "Bluetooth client connected to $deviceAddress")
     }
 
     private fun startClipboardMonitor() {
@@ -275,10 +332,14 @@ actual class ClipboardEngine actual constructor() {
         runBlocking {
             server?.stop()
             client?.disconnect()
+            bluetoothServer?.stop()
+            bluetoothClient?.disconnect()
         }
 
         server = null
         client = null
+        bluetoothServer = null
+        bluetoothClient = null
         _syncState.value = SyncState.Idle
         _isConnected.value = false
         _remoteDevice.value = null
@@ -294,8 +355,10 @@ actual class ClipboardEngine actual constructor() {
 
         if (isServer) {
             server?.sendClipboard(packet)
+            bluetoothServer?.sendClipboard(packet)
         } else {
             client?.sendClipboard(packet)
+            bluetoothClient?.sendClipboard(packet)
         }
     }
 
