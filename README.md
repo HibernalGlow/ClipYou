@@ -1,87 +1,85 @@
 <div align="center">
   
-  <h1>MicYou</h1>
+  <h1>Clipypse</h1>
   
-  <img src="./img/app_icon.png" width="128" height="128" />
+  <b>跨平台剪贴板同步工具</b>
 
   <br>
   <br>
 
-  <a href="https://hellogithub.com/repository/LanRhyme/MicYou" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=14f1a7bc70dc4b3daa2b4668200286e3&claim_uid=9B3umTywnclH56q&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-
-<a href="https://trendshift.io/repositories/25451" target="_blank"><img src="https://trendshift.io/api/badge/repositories/25451" alt="LanRhyme%2FMicYou | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
-  <br>
-
-  <a href="./README_zh-cn.md">简体中文</a> | <a href="./README_zh-tw.md">繁體中文</a> | <b>English</b>
-
-  <a href="https://aur.archlinux.org/packages/micyou-bin">
-    <img alt="AUR Version" src="https://img.shields.io/aur/version/micyou-bin?logo=archlinux&label=micyou-bin"></a>
-  <a href="https://qm.qq.com/q/V16hPpWPKO">
-    <img alt="QQ" src="https://img.shields.io/badge/QQ-995452107-12B7F5?style=flat&logo=qq&logoColor=white"><a>
-  <a href="https://t.me/MicYouChannel">
-    <img alt="TG" src="https://img.shields.io/badge/Telegram-@MicYouChannel-2CA5E0?style=flat&logo=telegram&logoColor=white"></a>
-
-  <h6>Support Me</h6>
-
-  <a href="https://afdian.com/a/LanRhyme" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/badge/afdian-@LanRhyme-946ce6?style=for-the-badge&logo=afdian&logoColor=white" alt="afdian"></a>
-
-  MicYou is a powerful tool that turns your Android device into a high-quality microphone for your PC. Built with Kotlin Multiplatform and Jetpack Compose/Material 3.
+  Clipypse 是一款强大的跨平台剪贴板同步工具，支持 Android 和 Desktop (Windows/Linux/macOS) 之间的剪贴板实时同步。采用 Kotlin Multiplatform 和 Jetpack Compose/Material 3 构建。
 
 </div>
 
-## Features
+## 主要功能
 
-- **Multiple Connection Modes**: Support for Wi-Fi and USB (ADB/AOA).
-- **Audio Processing**: Built-in Noise Suppression, Auto Gain Control (AGC), and Dereverberation.
-- **Cross-Platform**:
-  - **Android Client**: Modern Material 3 interface, dark/light theme support.
-  - **Desktop Server**: Receive audio on Windows/Linux/macOS.
-- **Virtual Microphone**: Works seamlessly with VB-Cable/BlackHole to act as a system microphone input.
-- **Customizable**: Adjust sample rate, channel count, and audio format.
+- **双向同步**：Android ↔ Desktop 实时双向同步
+- **多种数据类型**：支持纯文本、图片、文件同步
+- **多种连接模式**：支持 Wi-Fi 和 USB (ADB) 连接
+- **跨平台支持**：
+  - **Android 客户端**：采用现代 Material 3 设计，支持深色与浅色主题
+  - **桌面端服务端**：可在 Windows、Linux 和 macOS 上运行
+- **历史记录**：保存剪贴板历史，支持重新发送
+- **自动同步**：自动检测剪贴板变化并同步
 
-## Screenshots
+## 使用指南
 
-### Android App
-|                        Main Screen                        |                           Settings                            |
-|:---------------------------------------------------------:|:-------------------------------------------------------------:|
-| <img src="img/android_screenshot_main.png" width="300" /> | <img src="img/android_screenshot_settings.png" width="300" /> |
+### 桌面端作为服务端
 
-### Desktop App
-<img src="img/desktop_screenshot.png" width="600" />
+1. 在桌面端启动 Clipypse
+2. 选择 "Server" 模式
+3. 点击 "Start" 开始监听
+4. 记下显示的 IP 地址和端口
 
-## Getting Started
-Quick start and platform-specific setup instructions are now in the FAQ:
+### Android 端作为客户端
 
-- [Quick Start](./docs/FAQ.md#quick-start)
-- [Common issues](./docs/FAQ.md#faq)
+1. 在 Android 端启动 Clipypse
+2. 选择 "Client" 模式
+3. 输入桌面端显示的 IP 地址和端口
+4. 点击 "Start" 连接
 
-## Contributing
+### USB 连接
 
-We welcome contributions of all kinds! Whether you want to report a bug, suggest a feature, help with translations, or contribute code, please check our [Contributing Guidelines](./CONTRIBUTING.md) to get started.
+1. 使用 USB 线连接 Android 设备到电脑
+2. 确保已启用 ADB 调试
+3. 在 Android 端选择 "USB" 模式
+4. IP 地址会自动设置为 127.0.0.1
 
-## Contributors
-<a href="https://github.com/LanRhyme/MicYou/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=LanRhyme/MicYou" />
-</a>
+## 构建
 
-Made with [contrib.rocks](https://contrib.rocks).
+```bash
+# 构建所有平台
+./gradlew build
 
-## Star History
+# Android APK
+./gradlew :composeApp:assembleDebug
 
-<a href="https://www.star-history.com/#LanRhyme/MicYou&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=LanRhyme/MicYou&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=LanRhyme/MicYou&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=LanRhyme/MicYou&type=date&legend=top-left" />
- </picture>
-</a>
+# 桌面端运行
+./gradlew :composeApp:jvmRun
 
-## Acknowledgments
+# 桌面端打包
+./gradlew :composeApp:packageExe        # Windows
+./gradlew :composeApp:packageDmg        # macOS
+./gradlew :composeApp:packageDeb        # Linux
+```
 
-Special thanks to [CQU Open Source Software Mirror](https://mirrors.cqu.edu.cn/) for providing a mirror download service for this project.
+## 技术栈
 
-Special thanks to [MirrorChyan](https://mirrorchyan.com/en/get-start) for providing a high-speed mirror download service for ths project.
+- **Kotlin Multiplatform**：跨平台共享代码
+- **Jetpack Compose**：声明式 UI 框架
+- **Material 3**：现代设计系统
+- **Ktor**：网络通信框架
+- **Kotlinx Serialization**：数据序列化
+- **Protocol Buffers**：高效的二进制序列化格式
 
-Special thanks to all the [contributors](https://github.com/LanRhyme/MicYou/graphs/contributors) for helping to make the project even better.
+## 协议
+
+Clipypse 使用自定义的二进制协议进行通信：
+
+- **TCP**：控制消息和剪贴板数据传输
+- **Protocol Buffers**：数据序列化格式
+- **握手协议**：确保连接双方都是 Clipypse 客户端
+
+## 许可证
+
+MIT License

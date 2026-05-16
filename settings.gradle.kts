@@ -1,4 +1,4 @@
-rootProject.name = "MicYou"
+rootProject.name = "Clipypse"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -25,12 +25,6 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
-        maven {
-            url = uri("https://maven.maxhenkel.de/repository/public")
-        }
-        maven {
-            url = uri("https://jitpack.io")
-        }
     }
 }
 
@@ -39,4 +33,3 @@ plugins {
 }
 
 include(":composeApp")
-include(":plugin-api")

@@ -1,46 +1,69 @@
-# MicYou Android release shrink rules
-#
-# 目标：
-# 1) 保持宿主与外部插件(plugin.dex)之间的二进制兼容
-# 2) 尽量避免过宽 keep，保留 R8 压缩收益
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in Android SDK tools/proguard/proguard-android-optimize.txt
 
-# 插件系统通过 DexClassLoader + manifest.mainClass 动态加载外部插件，
-# 外部插件编译期依赖 plugin-api 的完整符号名与方法签名。
-# 因此需要保留 plugin-api 对外 ABI（类名 + 成员签名）。
--keep interface com.lanrhyme.micyou.plugin.Plugin { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginContext { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginHost { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginUIProvider { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginSettingsProvider { *; }
--keep interface com.lanrhyme.micyou.plugin.AudioEffectPlugin { *; }
--keep interface com.lanrhyme.micyou.plugin.AudioEffectProvider { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginDataChannel { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginDataChannelProvider { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginLocalization { *; }
--keep interface com.lanrhyme.micyou.plugin.PluginLocalizationProvider { *; }
+# Keep Kotlinx Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
 
--keep class com.lanrhyme.micyou.plugin.PluginManifest { *; }
--keep class com.lanrhyme.micyou.plugin.PluginInfo { *; }
--keep class com.lanrhyme.micyou.plugin.AudioConfig { *; }
--keep class com.lanrhyme.micyou.plugin.ConnectionInfo { *; }
--keep class com.lanrhyme.micyou.plugin.DataChannelConfig { *; }
--keep class com.lanrhyme.micyou.plugin.PluginHost$PlatformInfo { *; }
--keep class com.lanrhyme.micyou.plugin.PluginDataChannel$ReceivedPacket { *; }
-
--keep enum com.lanrhyme.micyou.plugin.StreamState { *; }
--keep enum com.lanrhyme.micyou.plugin.ConnectionMode { *; }
--keep enum com.lanrhyme.micyou.plugin.NoiseReductionType { *; }
--keep enum com.lanrhyme.micyou.plugin.PluginPlatform { *; }
--keep enum com.lanrhyme.micyou.plugin.DataChannelMode { *; }
--keep enum com.lanrhyme.micyou.plugin.MobileUIMode { *; }
-
-# 保留序列化/注解元数据（插件清单与协议对象使用 kotlinx.serialization）。
--keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
-
-# 保留 kotlinx.serialization 生成的成员，避免序列化异常。
--keepclassmembers class * {
+-keepclassmembers class kotlinx.serialization.json.** {
     *** Companion;
-    *** $serializer;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
 }
 
-# 可选：若第三方依赖在 release 下出现仅告警类缺失，再按需添加 dontwarn。
+-keep,includedescriptorclasses class com.lanrhyme.clipypse.**$$serializer { *; }
+-keepclassmembers class com.lanrhyme.clipypse.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.lanrhyme.clipypse.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep protobuf classes
+-keep class kotlinx.serialization.protobuf.** { *; }
+-keep class com.lanrhyme.clipypse.Protocol** { *; }
+
+# Keep network classes
+-keep class com.lanrhyme.clipypse.network.** { *; }
+
+# Keep clipboard engine
+-keep class com.lanrhyme.clipypse.ClipboardEngine { *; }
+-keep class com.lanrhyme.clipypse.ClipboardItem { *; }
+-keep class com.lanrhyme.clipypse.ClipboardType { *; }
+
+# General optimization
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-verbose
+
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
+
+-keep public class * extends android.app.Activity
+-keep public class * extends androidx.lifecycle.ViewModel
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
